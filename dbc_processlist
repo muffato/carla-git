@@ -19,12 +19,13 @@ use Data::Dumper;
 use Getopt::Long;
 
 my $default_group = 'compara';
-my ($group, $type, $server_regex, $without_loads, $help);
+my ($group, $type, $server_regex, $without_loads, $no_cache, $help);
 GetOptions(
     "g|group=s" => \$group,
     "t|type=s"  => \$type,
     "s|server=s" => \$server_regex,
     "w|without_loads" => \$without_loads,
+    "n|no_cache" => \$no_cache,
     "h|help" => \$help,
 );
 $type = $group if defined $group;
@@ -190,6 +191,7 @@ sub check_load {
     my $load_check_url = "http://production-services.ensembl.org/api/production/db/hosts/$host";
 	my $request = HTTP::Request->new(GET => "$load_check_url");
     $request->header( 'Content-Type' => 'application/json' );
+    $request->header( 'Cache-Control' => 'no-cache' ) if $no_cache;
     my $ua = LWP::UserAgent->new;
     my $response = $ua->request($request);
     my $content = $response->content();

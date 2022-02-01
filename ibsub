@@ -40,9 +40,6 @@ my $mem_h = $mem || shift @ARGV;
 $mem_h ||= '1gb';
 $mem_h = lc($mem_h);
 
-my $command = '$SHELL';
-$command = join(' ', @ARGV) if $ARGV[0];
-
 my ($mult, $unit);
 if ( $mem_h =~ /([0-9\.]+)gb/ ) {
 	$unit = $1;
@@ -57,6 +54,15 @@ else {
 }
 
 my $mb_req = $unit * $mult;
-my $bsub = "bsub -q $queue -M$mb_req -R\"select[mem>$mb_req] rusage[mem=$mb_req]\" -n $nuc -Is $command";
-print "$bsub\n";
+
+my @cmd;
+if (@ARGV) {
+	@cmd = @ARGV;
+} else {
+	push @cmd, $ENV{SHELL};
+}
+
+my @bsub = ('bsub', '-q', $queue, "-M$mb_req", qq{-R"select[mem>$mb_req] rusage[mem=$mb_req] span[hosts=1]"}, '-n', $nuc, '-Is');
+push @bsub, @cmd;
+print "@bsub\n";
 system($bsub);

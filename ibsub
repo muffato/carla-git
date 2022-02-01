@@ -23,12 +23,13 @@ use warnings;
 use Getopt::Long qw(:config pass_through);
 use Pod::Usage;
 
-my ($mem, $nuc, $queue, $help);
+my ($mem, $nuc, $queue, $gpu, $help);
 $nuc = 1;
 
 GetOptions(
 	"mem|m=s"   => \$mem,
 	"nuc|n=i"   => \$nuc,
+	"gpu|g=i"   => \$gpu,
 	"queue|q=s" => \$queue,
 	"help|h"    => \$help,
 );
@@ -54,6 +55,15 @@ else {
 
 my $mb_req = $unit * $mult;
 
+my $gpu_select = '';
+my $gpu_rusage = '';
+my @gpu_args;
+if ($gpu) {
+	$gpu_select = 'ngpus>0 && ';
+	$gpu_rusage = "ngpus_physical=${gpu}.00,";
+	@gpu_args = ('-gpu', 'mode=exclusive_process');
+}
+
 my @cmd;
 if (@ARGV) {
 	@cmd = @ARGV;
@@ -62,7 +72,7 @@ if (@ARGV) {
 	push @cmd, $ENV{SHELL};
 }
 
-my @bsub = ('bsub', "-M$mb_req", qq{-R"select[mem>$mb_req] rusage[mem=$mb_req] span[hosts=1]"}, '-n', $nuc, '-Is');
+my @bsub = ('bsub', "-M$mb_req", qq{-R"select[${gpu_select}mem>$mb_req] rusage[${gpu_rusage}mem=$mb_req] span[hosts=1]"}, @gpu_args, '-n', $nuc, '-Is');
 push @bsub, '-q', $queue if $queue;
 push @bsub, @cmd;
 print "@bsub\n";

@@ -25,7 +25,6 @@ use Pod::Usage;
 
 my ($mem, $nuc, $queue, $help);
 $nuc = 1;
-$queue = $ENV{LSB_DEFAULTQUEUE} || "production-rh74";
 
 GetOptions(
 	"mem|m=s"   => \$mem,
@@ -59,10 +58,12 @@ my @cmd;
 if (@ARGV) {
 	@cmd = @ARGV;
 } else {
+	$queue //= 'long';
 	push @cmd, $ENV{SHELL};
 }
 
-my @bsub = ('bsub', '-q', $queue, "-M$mb_req", qq{-R"select[mem>$mb_req] rusage[mem=$mb_req] span[hosts=1]"}, '-n', $nuc, '-Is');
+my @bsub = ('bsub', "-M$mb_req", qq{-R"select[mem>$mb_req] rusage[mem=$mb_req] span[hosts=1]"}, '-n', $nuc, '-Is');
+push @bsub, '-q', $queue if $queue;
 push @bsub, @cmd;
 print "@bsub\n";
 exec(@bsub);

@@ -65,4 +65,4 @@ if (@ARGV) {
 my @bsub = ('bsub', '-q', $queue, "-M$mb_req", qq{-R"select[mem>$mb_req] rusage[mem=$mb_req] span[hosts=1]"}, '-n', $nuc, '-Is');
 push @bsub, @cmd;
 print "@bsub\n";
-system($bsub);
+exec(@bsub);

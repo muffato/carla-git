@@ -36,21 +36,30 @@ GetOptions(
 
 pod2usage({-exitvalue => 0, -verbose => 3}) if $help;
 
-my $mem_h = $mem || shift @ARGV;
-$mem_h ||= '1gb';
-$mem_h = lc($mem_h);
-
 my ($mult, $unit);
-if ( $mem_h =~ /([0-9\.]+)gb/ ) {
-	$unit = $1;
-	$mult = 1000;
+sub parse_mem {
+	my $s = shift;
+	if ( $s =~ /^([0-9\.]+)([gm])b?$/i ) {
+		$unit = $1;
+		$mult = lc($2) eq 'g' ? 1000 : 1;
+		return 1;
+	}
+	return 0;
 }
-elsif ( $mem_h =~ /([0-9]+)mb/ ) {
-	$unit = $1;
-	$mult = 1;
+
+if ( $mem ) {
+	unless ( parse_mem($mem) ) {
+		die ( "Can't figure out memory statement. Please use e.g. 2gb, 4.5gb, 500mb" );
+	}
+}
+# No -m option, give the first ARGV argument a chance
+elsif ( @ARGV && parse_mem($ARGV[0]) ) {
+	shift @ARGV;
 }
 else {
-	die ( "Can't figure out memory statement. Please use e.g. 2gb, 4.5gb, 500mb" );
+	# 1 GB by default
+	$unit = 1;
+	$mult = 1000;
 }
 
 my $mb_req = $unit * $mult;

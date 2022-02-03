@@ -20,7 +20,7 @@ ibsub 100mb
 use strict;
 use warnings;
 
-use Getopt::Long qw(:config pass_through);
+use Getopt::Long qw(:config pass_through require_order);
 use Pod::Usage;
 
 my ($mem, $nuc, $queue, $gpu, $help);

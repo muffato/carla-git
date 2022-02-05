@@ -81,8 +81,9 @@ if (@ARGV) {
 	push @cmd, $ENV{SHELL};
 }
 
-my @bsub = ('bsub', "-M$mb_req", qq{-R"select[${gpu_select}mem>$mb_req] rusage[${gpu_rusage}mem=$mb_req] span[hosts=1]"}, @gpu_args, '-n', $nuc, '-Is');
+my @bsub = ('bsub', "-M$mb_req", qq{-R"select[${gpu_select}mem>$mb_req] rusage[${gpu_rusage}mem=$mb_req] span[hosts=1]"}, @gpu_args, '-n', $nuc);
 push @bsub, '-q', $queue if $queue;
+push @bsub, '-Is' if $0 =~ /\/ibsub$/;
 push @bsub, @cmd;
 print "@bsub\n";
 exec(@bsub);

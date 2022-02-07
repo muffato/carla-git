@@ -83,7 +83,15 @@ if (@ARGV) {
 
 my @bsub = ('bsub', "-M$mb_req", qq{-R"select[${gpu_select}mem>$mb_req] rusage[${gpu_rusage}mem=$mb_req] span[hosts=1]"}, @gpu_args, '-n', $nuc);
 push @bsub, '-q', $queue if $queue;
-push @bsub, '-Is' if $0 =~ /\/ibsub$/;
+if ($0 =~ /\/ibsub$/) {
+	push @bsub, '-Is';
+} else {
+	# Add -o /dev/null automatically since that's what I usually want
+	# NB: the grep is not 100% accurate, but it's good enough
+	unless (grep {/^-o/} @cmd) {
+		push @bsub, '-o', '/dev/null';
+	}
+}
 push @bsub, @cmd;
 print "@bsub\n";
 exec(@bsub);

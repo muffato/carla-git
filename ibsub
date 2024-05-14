@@ -6,14 +6,31 @@ Requesting resource requirements is annoyingly repetitive. Let this script help!
 Interprets human-readable memory requirements and submits the correct interactive
 bsub command.
 
-# run a specific command with 4Gb memory:
-ibsub 4gb perl this_is_not_a_script.pl
+=head2 Syntax
 
-# run a specific command with 2Gb memory and 2 cores:
-ibsub 2gb -n 2 perl this_is_not_a_script.pl
+  ibsub [options] [command]
 
-# request basic, empty interactive shell with 100mb memory:
-ibsub 100mb
+If no command is given, will run a shell.
+
+=head2 -n [int]
+
+Number of CPUs.
+Default: 1.
+
+=head2 -m [str]
+
+Memory. Must be of the form "123M", "123MB", "45G", or "45GB" (lower case accepted).
+Default: 1GB
+
+=head2 -g [int]
+
+Number of GPUs.
+Default: 0.
+
+=head2 -q [str]
+
+Name of the queue.
+Default: none if a command is given, "long" otherwise.
 
 =cut
 
